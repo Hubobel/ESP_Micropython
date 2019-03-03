@@ -12,8 +12,8 @@ PORT = 1883
 USER = "hubobel"
 PASSWORD = "polier2003"
 CLIENT_ID = ubinascii.hexlify(machine.unique_id())
-TOPIC = b"Test/esp"+str(CLIENT_ID)
-
+TOPIC = 'Test/esp'+str(CLIENT_ID)
+TOPIC = TOPIC.replace("'","_")
 try:
     station = network.WLAN(network.STA_IF)
     station.active(True)
@@ -25,6 +25,9 @@ except:
 i2c = machine.I2C(scl=machine.Pin(22), sda=machine.Pin(21))
 bme = bme280.BME280(i2c=i2c)
 oled = ssd1306.SSD1306_I2C(128, 32, i2c)
+
+#todo integer Wert publishen
+#todo subscriben
 
 while True:
     t, p, h = bme.values
