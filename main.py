@@ -7,20 +7,16 @@ import network
 from umqtt.simple import MQTTClient
 import ubinascii
 
-SERVER = "10.0.1.59"
-PORT = 1883
-USER = "hubobel"
-PASSWORD = "polier2003"
 CLIENT_ID = ubinascii.hexlify(machine.unique_id())
 TOPIC = 'Test/esp'+str(CLIENT_ID)
 TOPIC = TOPIC.replace("'","_")
+
 try:
     station = network.WLAN(network.STA_IF)
     station.active(True)
     station.connect("Hubobel", "PL19zPL19z")
-    wifi = True
 except:
-    wifi = False
+    None
 
 i2c = machine.I2C(scl=machine.Pin(22), sda=machine.Pin(21))
 bme = bme280.BME280(i2c=i2c)
