@@ -32,9 +32,30 @@ for x in range(12):
 threshold = sum(threshold)//len(threshold)
 print('Threshold: {0}'.format(threshold))
 release=True
-a=1
+a=4
 try:
     while True:
+        t, p, h = bme.values
+        mq_t = t.replace("C", "")
+        mq_p = p.replace("hPa", "")
+        mq_h = h.replace("%", "")
+        oled.fill(0)
+        if station.isconnected():
+            oled.pixel(127, 0, 1)
+            try:
+                c = MQTTClient('client_esp', '10.0.1.59', port=1884, user='hubobel', password='polier2003')
+                c.connect()
+                c.publish(TOPIC + '/Temperatur', mq_t)
+                c.publish(TOPIC + '/Luftfeuchte', mq_h)
+                c.publish(TOPIC + '/Luftdruck', mq_p)
+                oled.pixel(127, 10, 1)
+                c.disconnect()
+                #sleep(2)
+                # machine.deepsleep(30000)
+            except:
+                oled.pixel(117, 10, 1)
+        else:
+            station.connect("Hubobel", "PL19zPL19z")
         capacitance = touch.read()
         cap_ratio = capacitance / threshold
         if .40 < cap_ratio < .95:
@@ -42,15 +63,27 @@ try:
                 capacitance, threshold-capacitance, cap_ratio*100))
             sleep(.2)
             a = a + 1
-        if a == 4:
+        if a == 5:
             a=1
         if a == 1:
             print('Seite 1')
+            oled.text('Temperatur',0,0)
+            oled.text(str(t), 0, 10)
+            oled.show()
         if a == 2:
-            print('Seite 2')
+            oled.text('Luftdruck',0,0)
+            oled.text(str(p), 0, 10)
+            oled.show()
         if a == 3:
-            print('Seite 3')
-
+            oled.text('Luftfeuchte',0,0)
+            oled.text(str(h), 0, 10)
+            oled.show()
+        if a == 4:
+            oled.text('Temp. ' + str(t), 0, 0)
+            oled.text('Druck ' + str(p), 0, 10)
+            oled.text('Feucht. ' + str(h), 0, 20)
+            oled.show()
+        sleep(2)
 except KeyboardInterrupt:
     print('Abbruch')
 
