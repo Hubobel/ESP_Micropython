@@ -1,9 +1,14 @@
 from time import sleep
-from machine import Pin, TouchPad
+from machine import Pin, TouchPad, ADC
 import machine
 import bme280
+#import tsl2561
 import ssd1306
 import network
+
+pot = ADC(Pin(34))
+pot.atten(ADC.ATTN_11DB)
+
 
 from umqtt.simple import MQTTClient
 import ubinascii
@@ -24,6 +29,7 @@ bme = bme280.BME280(i2c=i2c)
 oled = ssd1306.SSD1306_I2C(128, 32, i2c)
 touch = TouchPad(Pin(12))
 threshold = []
+
 
 for x in range(12):
     threshold.append(touch.read())
@@ -48,25 +54,22 @@ try:
                 c.publish(TOPIC + '/Temperatur', mq_t)
                 c.publish(TOPIC + '/Luftfeuchte', mq_h)
                 c.publish(TOPIC + '/Luftdruck', mq_p)
+                c.publish(TOPIC + '/Bodenfeuchte', str(pot_value))
                 oled.pixel(127, 10, 1)
                 c.disconnect()
-                #sleep(2)
-                # machine.deepsleep(30000)
             except:
                 oled.pixel(117, 10, 1)
         else:
             station.connect("Hubobel", "PL19zPL19z")
+
         capacitance = touch.read()
         cap_ratio = capacitance / threshold
-        if .40 < cap_ratio < .95:
-            print('Touch: {0}, Diff {1},Ratio: {2}%.'.format(
-                capacitance, threshold-capacitance, cap_ratio*100))
-            sleep(.2)
-            a = a + 1
-        if a == 5:
-            a=1
+
+        # if .40 < cap_ratio < .95:
+        #     a += 1
+        # if a == 5:
+        #     a = 1
         if a == 1:
-            print('Seite 1')
             oled.text('Temperatur',0,0)
             oled.text(str(t), 0, 10)
             oled.show()
@@ -79,9 +82,11 @@ try:
             oled.text(str(h), 0, 10)
             oled.show()
         if a == 4:
+            pot_value = pot.read()
             oled.text('Temp. ' + str(t), 0, 0)
             oled.text('Druck ' + str(p), 0, 10)
-            oled.text('Feucht. ' + str(h), 0, 20)
+            #oled.text('Feucht. ' + str(h), 0, 20)
+            oled.text('cap ' + str(pot_value), 0, 20)
             oled.show()
         sleep(2)
 except KeyboardInterrupt:
