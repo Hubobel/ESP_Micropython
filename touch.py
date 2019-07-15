@@ -8,7 +8,7 @@ import network
 
 pot = ADC(Pin(34))
 pot.atten(ADC.ATTN_11DB)
-
+pindigital=machine.Pin(15)
 
 from umqtt.simple import MQTTClient
 import ubinascii
@@ -64,6 +64,7 @@ try:
 
         capacitance = touch.read()
         cap_ratio = capacitance / threshold
+        digitalinput
 
         # if .40 < cap_ratio < .95:
         #     a += 1
